@@ -6,30 +6,89 @@
     <title>GT Browser</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; }
-        body, html { height: 100%; width: 100%; overflow: hidden; background: #121212; }
-        .top-bar { display: flex; padding: 10px; background: #1a1a2e; align-items: center; gap: 10px; z-index: 10; position: relative; }
-        .logo { color: #bb86fc; font-weight: 900; font-size: 24px; margin: 0; }
+        body { height: 100vh; display: flex; flex-direction: column; background: #121212; color: white; overflow: hidden; }
+
+        /* شريط الأدوات العلوي */
+        .top-bar { display: flex; padding: 10px; background: #1a1a2e; align-items: center; gap: 5px; z-index: 10; }
+        .logo { color: #bb86fc; font-weight: 900; font-size: 20px; margin: 0 10px; }
+        .nav-btn { background: none; border: none; color: #bb86fc; font-size: 20px; cursor: pointer; padding: 5px 10px; }
         input { flex: 1; padding: 10px 15px; border-radius: 20px; border: none; font-size: 16px; background: #e0e0e0; outline: none; }
-        button { padding: 10px 20px; border-radius: 20px; border: none; background: #bb86fc; color: #000; font-weight: bold; cursor: pointer; }
-        iframe { width: 100%; height: calc(100vh - 65px); border: none; background: white; }
+        .go-btn { padding: 10px 20px; border-radius: 20px; border: none; background: #bb86fc; color: #000; font-weight: bold; cursor: pointer; }
+
+        /* شريط الإعدادات (للخلفية) */
+        .settings-bar { background: #24243e; padding: 5px 15px; display: flex; gap: 10px; font-size: 14px; }
+        .settings-bar label { cursor: pointer; color: #aaa; }
+        .settings-bar input[type="color"] { width: 30px; height: 30px; border: none; cursor: pointer; }
+
+        /* الإطار بتاع الموقع */
+        .browser-frame { flex: 1; width: 100%; border: none; background: white; }
+
+        /* السجل (History) */
+        .history-panel { display: none; position: absolute; top: 60px; left: 10px; right: 10px; background: #1a1a2e; border: 1px solid #333; border-radius: 10px; padding: 10px; z-index: 20; max-height: 300px; overflow-y: auto; }
+        .history-panel h3 { margin-bottom: 10px; color: #bb86fc; }
+        .history-panel div { padding: 8px; border-bottom: 1px solid #333; cursor: pointer; font-size: 14px; }
+        .history-panel div:hover { background: #24243e; }
     </style>
 </head>
 <body>
+
+    <!-- شريط الأدوات -->
     <div class="top-bar">
         <h1 class="logo">GT</h1>
-        <input type="text" id="urlInput" placeholder="ابحث في جوجل أو اكتب رابط...">
-        <button onclick="go()">روح</button>
+        <button class="nav-btn" onclick="history.back()">◀</button>
+        <button class="nav-btn" onclick="history.forward()">▶</button>
+        <button class="nav-btn" onclick="toggleHistory()">🕒</button>
+        <input type="text" id="urlInput" placeholder="ابحث أو اكتب رابط...">
+        <button class="go-btn" onclick="go()">روح</button>
     </div>
-    <iframe id="myFrame" src="https://www.google.com/search?igu=1" sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-presentation"></iframe>
+
+    <!-- شريط الخلفية -->
+    <div class="settings-bar">
+        <label>لون الخلفية:</label>
+        <input type="color" id="bgColor" onchange="changeBg()">
+        <span id="status">جاهز</span>
+    </div>
+
+    <!-- لوحة السجل -->
+    <div id="historyPanel" class="history-panel">
+        <h3>سجل التصفح</h3>
+        <div id="historyList"></div>
+    </div>
+
+    <!-- المتصفح -->
+    <iframe id="myFrame" class="browser-frame" src="https://www.google.com/search?igu=1"></iframe>
 
     <script>
+        // تغيير لون الخلفية
+        function changeBg() {
+            var color = document.getElementById('bgColor').value;
+            document.body.style.backgroundColor = color;
+        }
+
+        // تصفح
         function go() {
             var url = document.getElementById('urlInput').value;
             if (!url.startsWith('http')) {
-                // لو كتب كلام عادي، نروح لبحث جوجل
                 url = 'https://www.google.com/search?igu=1&q=' + encodeURIComponent(url);
             }
             document.getElementById('myFrame').src = url;
+            
+            // إضافة السجل
+            var list = document.getElementById('historyList');
+            var item = document.createElement('div');
+            item.innerText = url;
+            item.onclick = function() { document.getElementById('myFrame').src = url; };
+            list.prepend(item);
+        }
+
+        // إظهار/إخفاء السجل
+        function toggleHistory() {
+            var panel = document.getElementById('historyPanel');
+            if (panel.style.display === 'block') {
+                panel.style.display = 'none';
+            } else {
+                panel.style.display = 'block';
+            }
         }
     </script>
 </body>
