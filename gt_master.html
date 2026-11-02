@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GT Browser</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; }
+        body { height: 100vh; display: flex; flex-direction: column; overflow: hidden; background: #000; }
+        
+        /* الخلفية التحرة */
+        #bg-video { position: fixed; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: -1; opacity: 0.6; }
+        .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(135deg, rgba(0,0,0,0.7), rgba(48, 43, 99, 0.7)); z-index: 0; }
+
+        /* شاشة البداية (البحث) */
+        #home-screen { position: relative; z-index: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100%; width: 100%; }
+        .logo { font-size: 60px; font-weight: 900; color: #fff; text-shadow: 0 0 20px #bb86fc; margin-bottom: 20px; }
+        .logo span { color: #bb86fc; }
+        .search-box { display: flex; width: 90%; max-width: 600px; background: rgba(255,255,255,0.15); backdrop-filter: blur(15px); border-radius: 50px; padding: 5px; border: 1px solid rgba(255,255,255,0.3); }
+        .search-box input { flex: 1; background: transparent; border: none; padding: 15px 20px; color: white; font-size: 18px; outline: none; }
+        .search-box button { background: #bb86fc; border: none; padding: 0 30px; border-radius: 45px; font-size: 18px; font-weight: bold; cursor: pointer; }
+        .settings-btn { position: absolute; top: 20px; left: 20px; z-index: 2; background: rgba(255,255,255,0.2); border: none; color: white; padding: 10px; border-radius: 50%; font-size: 20px; cursor: pointer; }
+        #bg-upload { display: none; }
+
+        /* شاشة التفح */
+        #browser-screen { display: none; position: relative; z-index: 1; width: 100%; height: 100%; background: white; flex-direction: column; }
+        .browser-header { display: flex; padding: 10px; background: #1a1a2e; gap: 10px; align-items: center; }
+        .browser-header button { background: #bb86fc; border: none; padding: 10px; border-radius: 10px; font-weight: bold; cursor: pointer; }
+        .browser-header input { flex: 1; padding: 10px; border-radius: 10px; border: none; }
+        iframe { flex: 1; border: none; width: 100%; height: 100%; }
+    </style>
+</head>
+<body>
+
+    <video id="bg-video" autoplay loop muted playsinline></video>
+    <div class="overlay"></div>
+    <button class="settings-btn" onclick="document.getElementById('bg-upload').click()"></button>
+    <input type="file" id="bg-upload" accept="video/mp4,video/webm">
+
+    <!-- الشاشة الريية -->
+    <div id="home-screen">
+        <div class="logo">GT<span>.</span></div>
+        <div class="search-box">
+            <input type="text" id="query" placeholder="ابحث في جوجل نا..." autocomplete="off">
+            <button onclick="doSearch()">بحث</button>
+        </div>
+    </div>
+
+    <!-- شاشة التفح -->
+    <div id="browser-screen">
+        <div class="browser-header">
+            <button onclick="backToHome()">رجوع</button>
+            <input type="text" id="urlInput" placeholder="ابحث...">
+            <button onclick="go()">روح</button>
+        </div>
+        <iframe id="myFrame" src="https://www.google.com/search?igu=1"></iframe>
+    </div>
+
+    <script>
+        // تيير الخلفية
+        document.getElementById('bg-upload').addEventListener('change', function(e) {
+            var file = e.target.files[0];
+            if (file) {
+                var video = document.getElementById('bg-video');
+                video.src = URL.createObjectURL(file);
+                video.load();
+                video.play();
+            }
+        });
+
+        // البحث
+        function doSearch() {
+            var query = document.getElementById('query').value;
+            if (!query) return;
+            document.getElementById('home-screen').style.display = 'none';
+            document.getElementById('browser-screen').style.display = 'flex';
+            document.getElementById('myFrame').src = 'https://www.google.com/search?igu=1&q=' + encodeURIComponent(query);
+        }
+
+        // تفح راب باشر
+        function go() {
+            var url = document.getElementById('urlInput').value;
+            if (!url.startsWith('http')) {
+                url = 'https://www.google.com/search?igu=1&q=' + encodeURIComponent(url);
+            }
+            document.getElementById('myFrame').src = url;
+        }
+
+        // رجوع
+        function backToHome() {
+            document.getElementById('browser-screen').style.display = 'none';
+            document.getElementById('home-screen').style.display = 'flex';
+            document.getElementById('query').value = '';
+        }
+
+        // بحث ب Enter
+        document.getElementById('query').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') { doSearch(); }
+        });
+    </script>
+</body>
+</html>
